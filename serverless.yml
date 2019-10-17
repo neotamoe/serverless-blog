@@ -1,21 +1,29 @@
 service: serverless-blog
 
+custom:
+  settings:
+    DYNAMODB_TABLE: BlogTable
 provider:
   name: aws
   runtime: nodejs10.x
   profile: therealneotamoe
   region: us-east-2
+  environment: ${self:custom.settings}
 
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamoDB:Query
+        - dynamoDB:GetItem
+        - dynamoDB:PutItem
+        - dynamoDB:UpdateItem
+        - dynamoDB:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:090824678690:table/${self:custom.settings.DYNAMODB_TABLE}"
 #    - Effect: "Allow"
 #      Action:
 #        - "s3:PutObject"
@@ -99,13 +107,18 @@ functions:
 #      variable2: value2
 
 # you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+resources:
+ Resources:
+   BlogTable:
+     Type: AWS::DynamoDB::Table
+     Properties:
+        TableName: BlogTable
+        AttributeDefinitions:
+        - AttributeName: article_id
+          AttributeType: S
+        KeySchema:
+        - AttributeName: article_id
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
