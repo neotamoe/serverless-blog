@@ -7,9 +7,9 @@ module.exports.handler = (event, context, callback) => {
   const data = JSON.parse(event.body)
   console.log(data.article_id)
 
-  if(data.text && typeof data.text !== 'string') {
+  if(data.article_id && typeof data.article_id !== 'string') {
     console.error('Validation Failed');
-    callback(new Error('Body did not contain a text property'));
+    callback(new Error('Body did not contain an article_id property'));
     return;
   }
 
